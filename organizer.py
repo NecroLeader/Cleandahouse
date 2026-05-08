@@ -359,6 +359,12 @@ def generate_icon_ico() -> Path:
 # ---------------------------------------------------------------------------
 
 def main():
+    try:
+        import ctypes
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("Cleandahouse.Organizer")
+    except Exception:
+        pass
+
     load_config()
     generate_icon_ico()  # necesario para el ícono de la ventana de settings
 

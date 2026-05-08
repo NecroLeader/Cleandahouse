@@ -18,11 +18,37 @@ _HERE = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(_
 
 
 def _apply_icon(window):
-    """Aplica icon.ico a la ventana para que aparezca en la barra de tareas."""
+    """Aplica icon.ico a la ventana — barra de título Y barra de tareas de Windows."""
     ico = _HERE / "icon.ico"
-    if ico.exists():
-        # El delay es necesario: customtkinter pisa el ícono durante la inicialización
-        window.after(200, lambda: window.iconbitmap(str(ico)))
+    if not ico.exists():
+        return
+    ico_str = str(ico)
+
+    def do_apply():
+        # 1) Ícono en barra de título (tkinter nativo)
+        try:
+            window.iconbitmap(ico_str)
+        except Exception:
+            pass
+        # 2) Ícono en barra de tareas via Win32 API
+        try:
+            import ctypes
+            IMAGE_ICON   = 1
+            LR_LOADFROMFILE = 0x00000010
+            LR_DEFAULTSIZE  = 0x00000040
+            WM_SETICON   = 0x0080
+            hicon = ctypes.windll.user32.LoadImageW(
+                None, ico_str, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE
+            )
+            if hicon:
+                hwnd = window.winfo_id()
+                ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, 1, hicon)  # ICON_BIG
+                ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, 0, hicon)  # ICON_SMALL
+        except Exception:
+            pass
+
+    # Delay necesario: customtkinter pisa el ícono durante su inicialización
+    window.after(250, do_apply)
 
 
 # ---------------------------------------------------------------------------
