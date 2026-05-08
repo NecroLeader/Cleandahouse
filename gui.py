@@ -21,10 +21,8 @@ def _apply_icon(window):
     """Aplica icon.ico a la ventana para que aparezca en la barra de tareas."""
     ico = _HERE / "icon.ico"
     if ico.exists():
-        try:
-            window.iconbitmap(str(ico))
-        except Exception:
-            pass
+        # El delay es necesario: customtkinter pisa el ícono durante la inicialización
+        window.after(200, lambda: window.iconbitmap(str(ico)))
 
 
 # ---------------------------------------------------------------------------
@@ -243,13 +241,7 @@ class SettingsWindow(ctk.CTk):
             parts.append("contiene: " + ", ".join(conds["name_contains"]))
         summary = "  |  ".join(parts) if parts else "(sin condiciones)"
 
-        info = ctk.CTkFrame(row, fg_color="transparent")
-        info.pack(side="left", fill="x", expand=True, pady=4)
-        ctk.CTkLabel(info, text=f"{rule['name']}  →  {rule['dest']}",
-                     anchor="w", font=ctk.CTkFont(weight="bold")).pack(fill="x", padx=4)
-        ctk.CTkLabel(info, text=summary, anchor="w",
-                     text_color="gray", font=ctk.CTkFont(size=11)).pack(fill="x", padx=4)
-
+        # Botones PRIMERO (side=right), así el label expansivo nunca los empuja
         btns = ctk.CTkFrame(row, fg_color="transparent")
         btns.pack(side="right", padx=6)
 
@@ -267,6 +259,13 @@ class SettingsWindow(ctk.CTk):
         ctk.CTkButton(btns, text="Borrar", width=64,
                       fg_color="#c0392b", hover_color="#922b21",
                       command=make_delete(i)).pack(side="left")
+
+        info = ctk.CTkFrame(row, fg_color="transparent")
+        info.pack(side="left", fill="x", expand=True, pady=4)
+        ctk.CTkLabel(info, text=f"{rule['name']}  →  {rule['dest']}",
+                     anchor="w", font=ctk.CTkFont(weight="bold")).pack(fill="x", padx=4)
+        ctk.CTkLabel(info, text=summary, anchor="w",
+                     text_color="gray", font=ctk.CTkFont(size=11)).pack(fill="x", padx=4)
 
     # --- actions -------------------------------------------------------------
 
