@@ -33,7 +33,6 @@ if getattr(sys, "frozen", False):
 else:
     HERE = Path(__file__).parent
 
-DOWNLOADS    = Path.home() / "Downloads"
 CONFIG_FILE  = HERE / "config.json"
 PENDING_FILE = HERE / "pending.json"
 LOG_FILE     = HERE / "cleandahouse.log"
@@ -123,6 +122,16 @@ def delay_seconds() -> float:
 def delay_label() -> str:
     return f"{_config.get('delay_value', 1)} {_config.get('delay_unit', 'dias')}"
 
+
+def get_watch_folders() -> list[Path]:
+    raw = _config.get("watch_folders", [str(Path.home() / "Downloads")])
+    folders = []
+    for f in raw:
+        p = Path(f).expanduser()
+        if p.is_dir():
+            folders.append(p)
+    return folders or [Path.home() / "Downloads"]
+
 # ---------------------------------------------------------------------------
 # CLASIFICADOR  (lee reglas del config en cada llamada)
 # ---------------------------------------------------------------------------
@@ -155,7 +164,7 @@ def classify(filename: str) -> str | None:
 def is_eligible(path: Path) -> bool:
     return (
         path.is_file()
-        and path.parent == DOWNLOADS
+        and path.parent in get_watch_folders()
         and path.name.lower() not in SKIP_NAMES
         and path.suffix.lower() not in SKIP_EXT
     )
@@ -200,9 +209,10 @@ def add_to_pending(path: Path):
     if not is_eligible(path):
         return
     pending = load_pending()
-    if path.name not in pending:
+    key = str(path)
+    if key not in pending:
         ts = datetime.fromtimestamp(path.stat().st_mtime).isoformat()
-        pending[path.name] = ts
+        pending[key] = ts
         save_pending(pending)
         log.info(f"PENDIENTE  {path.name}  (delay: {delay_label()})")
 
@@ -232,12 +242,13 @@ def move_file(src: Path):
     if dest_folder is None:
         return  # ninguna regla aplica → se queda
 
-    dest_dir = DOWNLOADS / dest_folder
+    dest_path = Path(dest_folder)
+    dest_dir = dest_path if dest_path.is_absolute() else src.parent / dest_folder
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / src.name
 
     if dest.exists():
-        revisar = DOWNLOADS / "revisar"
+        revisar = src.parent / "revisar"
         revisar.mkdir(exist_ok=True)
         src_t, dest_t = src.stat().st_mtime, dest.stat().st_mtime
         if src_t > dest_t:
@@ -255,7 +266,7 @@ def move_file(src: Path):
 
     try:
         shutil.move(str(src), str(dest))
-        log.info(f"MOVIDO     {src.name}  ->  {dest_dir.relative_to(DOWNLOADS)}/")
+        log.info(f"MOVIDO     {src.name}  ->  {dest_dir}/")
     except Exception as e:
         log.error(f"ERROR      {src.name}  ({e})")
 
@@ -270,21 +281,21 @@ def check_and_move():
     changed = False
     now = datetime.now()
 
-    for filename, ts_str in list(pending.items()):
-        path = DOWNLOADS / filename
+    for key, ts_str in list(pending.items()):
+        path = Path(key)
         if not path.exists():
-            del pending[filename]
+            del pending[key]
             changed = True
             continue
         try:
             age = (now - datetime.fromisoformat(ts_str)).total_seconds()
         except ValueError:
-            del pending[filename]
+            del pending[key]
             changed = True
             continue
         if age >= delay:
             move_file(path)
-            del pending[filename]
+            del pending[key]
             changed = True
 
     if changed:
@@ -295,10 +306,12 @@ def mover_loop(stop_event: threading.Event, icon: pystray.Icon):
     # Al arrancar: registrar archivos ya presentes usando su mtime
     pending = load_pending()
     added = 0
-    for f in DOWNLOADS.iterdir():
-        if is_eligible(f) and f.name not in pending:
-            pending[f.name] = datetime.fromtimestamp(f.stat().st_mtime).isoformat()
-            added += 1
+    for folder in get_watch_folders():
+        for f in folder.iterdir():
+            key = str(f)
+            if is_eligible(f) and key not in pending:
+                pending[key] = datetime.fromtimestamp(f.stat().st_mtime).isoformat()
+                added += 1
     if added:
         save_pending(pending)
         log.info(f"INICIO     {added} archivos registrados con su fecha de descarga")
@@ -372,7 +385,8 @@ def main():
     settings_event    = threading.Event()
 
     observer = Observer()
-    observer.schedule(DownloadHandler(), str(DOWNLOADS), recursive=False)
+    for folder in get_watch_folders():
+        observer.schedule(DownloadHandler(), str(folder), recursive=False)
     observer.daemon = True
     observer.start()
 
@@ -384,7 +398,7 @@ def main():
         icon.stop()
 
     def on_open(icon, item):
-        subprocess.Popen(["explorer", str(DOWNLOADS)])
+        subprocess.Popen(["explorer", str(get_watch_folders()[0])])
 
     def on_log(icon, item):
         subprocess.Popen(["notepad", str(LOG_FILE)])
@@ -407,14 +421,15 @@ def main():
     ).start()
 
     icon.run_detached()
-    log.info(f"Cleandahouse activo | delay: {delay_label()} | {DOWNLOADS}")
+    folders_str = ", ".join(str(f) for f in get_watch_folders())
+    log.info(f"Cleandahouse activo | delay: {delay_label()} | monitoreando: {folders_str}")
 
     # Hilo principal: maneja la GUI cuando se solicita
     try:
         while not stop_event.is_set():
             if settings_event.is_set():
                 settings_event.clear()
-                win = SettingsWindow(CONFIG_FILE, DOWNLOADS)
+                win = SettingsWindow(CONFIG_FILE)
                 win.mainloop()
                 try:
                     win.destroy()

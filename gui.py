@@ -176,13 +176,12 @@ class RuleEditor(ctk.CTkToplevel):
 # ---------------------------------------------------------------------------
 
 class SettingsWindow(ctk.CTk):
-    def __init__(self, config_path: Path, downloads: Path):
+    def __init__(self, config_path: Path):
         super().__init__()
         self.config_path = config_path
-        self.downloads = downloads
 
         self.title("Cleandahouse — Configuración")
-        self.geometry("580x540")
+        self.geometry("580x660")
         self.minsize(480, 420)
         self.protocol("WM_DELETE_WINDOW", self.quit)  # cierre limpio via X
         _apply_icon(self)
@@ -200,6 +199,8 @@ class SettingsWindow(ctk.CTk):
         self.delay_value = data.get("delay_value", 1)
         self.delay_unit  = data.get("delay_unit", "dias")
         self.rules: list[dict] = data.get("rules", [])
+        default_folders = [str(Path.home() / "Downloads")]
+        self.watch_folders: list[str] = data.get("watch_folders", default_folders)
 
     # --- layout --------------------------------------------------------------
 
@@ -212,6 +213,16 @@ class SettingsWindow(ctk.CTk):
         ctk.CTkEntry(top, textvariable=self.delay_val_var, width=52).pack(side="left", padx=2)
         self.delay_unit_var = ctk.StringVar(value=self.delay_unit)
         ctk.CTkOptionMenu(top, variable=self.delay_unit_var, values=UNIT_OPTIONS, width=130).pack(side="left", padx=4)
+
+        # Folders monitored
+        fhdr = ctk.CTkFrame(self, fg_color="transparent")
+        fhdr.pack(fill="x", padx=16, pady=(12, 2))
+        ctk.CTkLabel(fhdr, text="Carpetas monitoreadas", font=ctk.CTkFont(size=14, weight="bold")).pack(side="left")
+        ctk.CTkButton(fhdr, text="+ Agregar", width=90, command=self._add_folder).pack(side="right")
+
+        self.folders_frame = ctk.CTkScrollableFrame(self, label_text="", height=100)
+        self.folders_frame.pack(fill="x", padx=16, pady=4)
+        self._render_folders()
 
         # Rules header
         hdr = ctk.CTkFrame(self, fg_color="transparent")
@@ -294,17 +305,51 @@ class SettingsWindow(ctk.CTk):
         ctk.CTkLabel(info, text=summary, anchor="w",
                      text_color="gray", font=ctk.CTkFont(size=11)).pack(fill="x", padx=4)
 
+    def _render_folders(self):
+        for w in self.folders_frame.winfo_children():
+            w.destroy()
+        if not self.watch_folders:
+            ctk.CTkLabel(self.folders_frame, text="Sin carpetas. Agregá al menos una.", text_color="gray").pack(pady=8)
+            return
+        for i, folder in enumerate(self.watch_folders):
+            self._folder_row(i, folder)
+
+    def _folder_row(self, i: int, folder: str):
+        row = ctk.CTkFrame(self.folders_frame)
+        row.pack(fill="x", pady=2)
+
+        def make_remove(idx):
+            def _r():
+                self.watch_folders.pop(idx)
+                self._render_folders()
+            return _r
+
+        ctk.CTkButton(row, text="✕", width=28, fg_color="gray40", hover_color="gray30",
+                      command=make_remove(i)).pack(side="right", padx=6, pady=4)
+        ctk.CTkLabel(row, text=folder, anchor="w").pack(side="left", fill="x", expand=True, padx=8, pady=4)
+
+    def _add_folder(self):
+        folder = filedialog.askdirectory(title="Seleccionar carpeta a monitorear", parent=self)
+        if folder and folder not in self.watch_folders:
+            self.watch_folders.append(folder)
+            self._render_folders()
+
+    def _get_browse_base(self) -> Path:
+        if self.watch_folders:
+            return Path(self.watch_folders[0]).expanduser()
+        return Path.home() / "Downloads"
+
     # --- actions -------------------------------------------------------------
 
     def _add_rule(self):
-        dlg = RuleEditor(self, self.downloads)
+        dlg = RuleEditor(self, self._get_browse_base())
         self.wait_window(dlg)
         if dlg.result:
             self.rules.append(dlg.result)
             self._render_rules()
 
     def _edit_rule(self, idx: int):
-        dlg = RuleEditor(self, self.downloads, self.rules[idx])
+        dlg = RuleEditor(self, self._get_browse_base(), self.rules[idx])
         self.wait_window(dlg)
         if dlg.result:
             dlg.result["enabled"] = self.rules[idx].get("enabled", True)
@@ -325,10 +370,15 @@ class SettingsWindow(ctk.CTk):
             messagebox.showerror("Error", "El delay debe ser un número mayor a 0.", parent=self)
             return
 
+        if not self.watch_folders:
+            messagebox.showerror("Error", "Agregá al menos una carpeta a monitorear.", parent=self)
+            return
+
         config = {
-            "delay_value": val,
-            "delay_unit":  self.delay_unit_var.get(),
-            "rules":       self.rules,
+            "delay_value":   val,
+            "delay_unit":    self.delay_unit_var.get(),
+            "watch_folders": self.watch_folders,
+            "rules":         self.rules,
         }
         self.config_path.write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
         messagebox.showinfo("Guardado", "Configuración aplicada.\nLos cambios entran en el próximo ciclo.", parent=self)
