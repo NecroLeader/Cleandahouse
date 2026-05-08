@@ -1,0 +1,19 @@
+# Runtime (generados por el programa, no se commitean)
+pending.json
+cleandahouse.log
+organizer.log
+icon.ico
+
+# Build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+dist/
+build/
+*.spec
+
+# Entorno local
+.env
+venv/
+.venv/

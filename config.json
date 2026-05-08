@@ -1,0 +1,56 @@
+{
+  "delay_value": 1,
+  "delay_unit": "dias",
+  "rules": [
+    {
+      "name": "Audio",
+      "enabled": true,
+      "conditions": {
+        "extensions": [".mp3", ".m4a", ".wav", ".ogg", ".flac", ".aac"],
+        "name_starts": [],
+        "name_contains": []
+      },
+      "dest": "Media/Audio"
+    },
+    {
+      "name": "Video",
+      "enabled": true,
+      "conditions": {
+        "extensions": [".mp4", ".mkv", ".avi", ".mov", ".wmv"],
+        "name_starts": [],
+        "name_contains": []
+      },
+      "dest": "Media/Video"
+    },
+    {
+      "name": "Imagenes",
+      "enabled": true,
+      "conditions": {
+        "extensions": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"],
+        "name_starts": [],
+        "name_contains": []
+      },
+      "dest": "Media/Imagenes"
+    },
+    {
+      "name": "Instaladores",
+      "enabled": true,
+      "conditions": {
+        "extensions": [".exe", ".msi", ".iso", ".apk", ".dmg", ".pkg"],
+        "name_starts": [],
+        "name_contains": []
+      },
+      "dest": "Instaladores"
+    },
+    {
+      "name": "Documentos",
+      "enabled": true,
+      "conditions": {
+        "extensions": [".pdf", ".docx", ".doc", ".xlsx", ".xls", ".pptx", ".odt"],
+        "name_starts": [],
+        "name_contains": []
+      },
+      "dest": "Documentos"
+    }
+  ]
+}
