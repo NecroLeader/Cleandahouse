@@ -4,8 +4,10 @@ Windows tray app that automatically moves files from your Downloads folder to or
 
 ## Features
 
-- **Delay-based moving** — files stay in Downloads for X minutes/hours/days/weeks before being moved
+- **Multiple source folders** — monitor Downloads, Personal, Work, or any folder you want
+- **Delay-based moving** — files stay put for X minutes/hours/days/weeks before being moved
 - **Fully configurable rules** — define your own conditions (extension, name prefix, name contains) and destinations
+- **Per-folder organization** — each monitored folder gets its own subfolder structure (e.g. `Downloads/PDF`, `Work/PDF`)
 - **System tray** — runs silently in the background, near the clock
 - **GUI settings** — right-click the tray icon → "Configurar reglas"
 - **Duplicate handling** — if a file already exists in the destination, the older version goes to `revisar/`
@@ -40,6 +42,21 @@ pythonw organizer.py
 
 Run `instalar_inicio.bat` — creates a shortcut in the Windows Startup folder.
 Run `desinstalar_inicio.bat` to remove it.
+
+---
+
+## Configuring monitored folders
+
+Right-click the tray icon → **Configurar reglas** → section **"Carpetas monitoreadas"**
+
+Add any folder you want to watch. Each folder is organized independently — if a rule sends `*.pdf` to `PDF`, the subfolder is created inside each monitored folder.
+
+Example with three monitored folders and one rule (`*.pdf → PDF`):
+```
+Downloads/PDF/
+Personal/PDF/
+Work/PDF/
+```
 
 ---
 
