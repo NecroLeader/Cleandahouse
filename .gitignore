@@ -4,6 +4,9 @@ cleandahouse.log
 organizer.log
 icon.ico
 
+# Config personal del usuario (cada uno tiene el suyo)
+config.json
+
 # Build
 __pycache__/
 *.pyc
