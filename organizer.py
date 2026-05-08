@@ -360,6 +360,7 @@ def generate_icon_ico() -> Path:
 
 def main():
     load_config()
+    generate_icon_ico()  # necesario para el ícono de la ventana de settings
 
     stop_event        = threading.Event()
     settings_event    = threading.Event()

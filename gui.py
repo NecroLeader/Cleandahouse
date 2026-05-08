@@ -2,6 +2,7 @@
 gui.py — Ventana de configuración de Cleandahouse
 """
 
+import sys
 import json
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -12,6 +13,18 @@ ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")
 
 UNIT_OPTIONS = ["minutos", "horas", "dias", "semanas"]
+
+_HERE = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+
+
+def _apply_icon(window):
+    """Aplica icon.ico a la ventana para que aparezca en la barra de tareas."""
+    ico = _HERE / "icon.ico"
+    if ico.exists():
+        try:
+            window.iconbitmap(str(ico))
+        except Exception:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -30,6 +43,7 @@ class RuleEditor(ctk.CTkToplevel):
         self.lift()
         self.focus_force()
         self.grab_set()
+        _apply_icon(self)
 
         self._build(rule or {})
 
@@ -146,6 +160,7 @@ class SettingsWindow(ctk.CTk):
         self.title("Cleandahouse — Configuración")
         self.geometry("580x540")
         self.minsize(480, 420)
+        _apply_icon(self)
 
         self._load()
         self._build()
