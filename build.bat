@@ -1,4 +1,8 @@
 @echo off
+:: Compila Cleandahouse en un .exe standalone con PyInstaller.
+:: El resultado queda en la carpeta dist/ junto con config.json.
+:: Distribuí esos dos archivos juntos — el usuario no necesita Python instalado.
+:: Solo necesitas correr esto una vez (o cuando hagas cambios al codigo).
 cd /d "%~dp0"
 
 echo [1/4] Instalando dependencias...
@@ -25,6 +29,5 @@ echo ================================================
 echo  Listo!
 echo  Ejecutable: dist\Cleandahouse.exe
 echo  Copialo junto con config.json donde quieras.
-echo  El usuario edita config.json para sus reglas.
 echo ================================================
 pause

@@ -1,10 +1,13 @@
 @echo off
-:: Agrega el organizer al inicio de Windows usando pythonw (sin consola)
+:: Agrega Cleandahouse al inicio de Windows.
+:: Después de ejecutar esto, el programa arranca automáticamente
+:: cada vez que enciendas la PC, sin necesidad de abrir nada.
+:: Para desinstalarlo del inicio, usá desinstalar_inicio.bat
 setlocal
 
 set SCRIPT=%~dp0organizer.py
 set STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
-set LNK=%STARTUP%\Downloads Organizer.lnk
+set LNK=%STARTUP%\Cleandahouse.lnk
 
 powershell -NoProfile -Command ^
   "$ws = New-Object -ComObject WScript.Shell; ^
@@ -12,13 +15,12 @@ powershell -NoProfile -Command ^
    $s.TargetPath = 'pythonw'; ^
    $s.Arguments = '\"%SCRIPT%\"'; ^
    $s.WorkingDirectory = '%~dp0'; ^
-   $s.Description = 'Downloads Organizer'; ^
+   $s.Description = 'Cleandahouse Downloads Organizer'; ^
    $s.Save()"
 
 if exist "%LNK%" (
-    echo Listo. El organizer va a arrancar automaticamente con Windows.
-    echo Atajo creado en: %LNK%
+    echo Listo. Cleandahouse va a arrancar automaticamente con Windows.
 ) else (
-    echo Error al crear el atajo.
+    echo Error al crear el atajo. Proba ejecutar como administrador.
 )
 pause
