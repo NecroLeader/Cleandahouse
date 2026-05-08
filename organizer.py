@@ -410,6 +410,10 @@ def main():
                 settings_event.clear()
                 win = SettingsWindow(CONFIG_FILE, DOWNLOADS)
                 win.mainloop()
+                try:
+                    win.destroy()
+                except Exception:
+                    pass
             time.sleep(0.1)
     except KeyboardInterrupt:
         stop_event.set()

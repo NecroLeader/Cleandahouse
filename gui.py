@@ -158,6 +158,7 @@ class SettingsWindow(ctk.CTk):
         self.title("Cleandahouse — Configuración")
         self.geometry("580x540")
         self.minsize(480, 420)
+        self.protocol("WM_DELETE_WINDOW", self.quit)  # cierre limpio via X
         _apply_icon(self)
 
         self._load()
@@ -305,4 +306,4 @@ class SettingsWindow(ctk.CTk):
         }
         self.config_path.write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
         messagebox.showinfo("Guardado", "Configuración aplicada.\nLos cambios entran en el próximo ciclo.", parent=self)
-        self.destroy()
+        self.quit()  # termina el mainloop; destroy() lo hace main() después
