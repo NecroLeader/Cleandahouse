@@ -62,8 +62,8 @@ class RuleEditor(ctk.CTkToplevel):
         self._on_save = on_save
 
         self.title("Editar regla" if rule else "Nueva regla")
-        self.geometry("480x500")
-        self.resizable(False, False)
+        self.geometry("480x600")
+        self.resizable(False, True)
         self.lift()
         self.focus_force()
         self.grab_set()
