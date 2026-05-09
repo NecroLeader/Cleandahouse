@@ -21,13 +21,12 @@ pyinstaller ^
   --collect-data customtkinter ^
   organizer.py
 
-echo [4/4] Copiando config.json al directorio de salida...
-copy config.json dist\config.json >nul
+echo [4/4] Listo.
 
 echo.
 echo ================================================
-echo  Listo!
 echo  Ejecutable: dist\Cleandahouse.exe
-echo  Copialo junto con config.json donde quieras.
+echo  Usa config.json de la raiz del proyecto.
+echo  No mover el exe fuera de dist\ sin mover todo.
 echo ================================================
 pause

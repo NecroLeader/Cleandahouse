@@ -29,7 +29,7 @@ from gui import SettingsWindow
 # ---------------------------------------------------------------------------
 
 if getattr(sys, "frozen", False):
-    HERE = Path(sys.executable).parent
+    HERE = Path(sys.executable).parent.parent  # dist/../ → raíz del proyecto
 else:
     HERE = Path(__file__).parent
 

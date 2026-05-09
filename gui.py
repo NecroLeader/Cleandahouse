@@ -14,7 +14,7 @@ ctk.set_default_color_theme("blue")
 
 UNIT_OPTIONS = ["minutos", "horas", "dias", "semanas"]
 
-_HERE = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
+_HERE = Path(sys.executable).parent.parent if getattr(sys, "frozen", False) else Path(__file__).parent
 
 
 def _apply_icon(window):
@@ -56,10 +56,10 @@ def _apply_icon(window):
 # ---------------------------------------------------------------------------
 
 class RuleEditor(ctk.CTkToplevel):
-    def __init__(self, parent, downloads: Path, rule: dict = None):
+    def __init__(self, parent, downloads: Path, rule: dict = None, on_save=None):
         super().__init__(parent)
         self.downloads = downloads
-        self.result: dict | None = None
+        self._on_save = on_save
 
         self.title("Editar regla" if rule else "Nueva regla")
         self.geometry("480x430")
@@ -158,7 +158,7 @@ class RuleEditor(ctk.CTkToplevel):
             messagebox.showerror("Error", "Agregá al menos una condición.", parent=self)
             return
 
-        self.result = {
+        result = {
             "name": name,
             "enabled": True,
             "conditions": {
@@ -168,6 +168,8 @@ class RuleEditor(ctk.CTkToplevel):
             },
             "dest": dest,
         }
+        if self._on_save:
+            self._on_save(result)
         self.destroy()
 
 
@@ -342,19 +344,17 @@ class SettingsWindow(ctk.CTk):
     # --- actions -------------------------------------------------------------
 
     def _add_rule(self):
-        dlg = RuleEditor(self, self._get_browse_base())
-        self.wait_window(dlg)
-        if dlg.result:
-            self.rules.append(dlg.result)
+        def on_save(result):
+            self.rules.append(result)
             self._render_rules()
+        RuleEditor(self, self._get_browse_base(), on_save=on_save)
 
     def _edit_rule(self, idx: int):
-        dlg = RuleEditor(self, self._get_browse_base(), self.rules[idx])
-        self.wait_window(dlg)
-        if dlg.result:
-            dlg.result["enabled"] = self.rules[idx].get("enabled", True)
-            self.rules[idx] = dlg.result
+        def on_save(result):
+            result["enabled"] = self.rules[idx].get("enabled", True)
+            self.rules[idx] = result
             self._render_rules()
+        RuleEditor(self, self._get_browse_base(), self.rules[idx], on_save=on_save)
 
     def _delete_rule(self, idx: int):
         name = self.rules[idx]["name"]
