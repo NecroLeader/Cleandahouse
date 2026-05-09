@@ -62,7 +62,6 @@ class RuleEditor(ctk.CTkToplevel):
         self._on_save = on_save
 
         self.title("Editar regla" if rule else "Nueva regla")
-        self.geometry("480x600")
         self.resizable(False, True)
         self.lift()
         self.focus_force()
@@ -70,6 +69,10 @@ class RuleEditor(ctk.CTkToplevel):
         _apply_icon(self)
 
         self._build(rule or {})
+
+        # Auto-ajustar alto al contenido real (funciona con cualquier DPI)
+        self.update_idletasks()
+        self.geometry(f"480x{self.winfo_reqheight()}")
 
     def _build(self, rule: dict):
         pad = {"padx": 16, "pady": 3}

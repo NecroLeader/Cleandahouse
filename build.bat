@@ -15,6 +15,7 @@ echo [3/4] Compilando .exe...
 pyinstaller ^
   --onefile ^
   --windowed ^
+  --clean ^
   --name Cleandahouse ^
   --icon icon.ico ^
   --hidden-import pystray._win32 ^
