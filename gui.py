@@ -14,7 +14,7 @@ ctk.set_default_color_theme("blue")
 
 UNIT_OPTIONS = ["minutos", "horas", "dias", "semanas"]
 
-_HERE = Path(sys.executable).parent.parent if getattr(sys, "frozen", False) else Path(__file__).parent
+_HERE = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
 
 
 def _apply_icon(window):

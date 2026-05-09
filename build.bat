@@ -12,7 +12,7 @@ echo [2/4] Generando icono...
 python -c "from organizer import generate_icon_ico; generate_icon_ico(); print('icon.ico OK')"
 
 echo [3/4] Compilando .exe...
-pyinstaller ^
+python -m PyInstaller ^
   --onefile ^
   --windowed ^
   --clean ^
@@ -22,12 +22,12 @@ pyinstaller ^
   --collect-data customtkinter ^
   organizer.py
 
-echo [4/4] Listo.
+echo [4/4] Copiando config base a dist\...
+if not exist dist\config.json copy config.default.json dist\config.json >nul
 
 echo.
 echo ================================================
 echo  Ejecutable: dist\Cleandahouse.exe
-echo  Usa config.json de la raiz del proyecto.
-echo  No mover el exe fuera de dist\ sin mover todo.
+echo  Para GitHub Release: zipear exe + config.json
 echo ================================================
 pause
