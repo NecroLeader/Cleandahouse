@@ -111,13 +111,14 @@ Output: `dist/Cleandahouse.exe`. If `dist/config.json` doesn't exist, the build 
 
 Each user edits their `config.json` for their own rules.
 
-**To publish a GitHub Release**, attach these three files individually:
+**To publish a GitHub Release**, attach these four files individually:
 
 | File | Source |
 |------|--------|
 | `Cleandahouse.exe` | `dist/Cleandahouse.exe` |
 | `config.json` | `config.default.json` (rename before uploading) |
 | `README.md` | root `README.md` |
+| `LICENSE` | root `LICENSE` |
 
 > Personal `config.json` is gitignored — never commit it.
 
@@ -141,4 +142,4 @@ Files with no matching rule stay in Downloads untouched.
 
 ## License
 
-MIT
+[PolyForm Noncommercial 1.0.0](LICENSE) — free to use, modify, and distribute for any **noncommercial** purpose. Commercial use requires explicit permission from the author.
