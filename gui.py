@@ -14,6 +14,20 @@ ctk.set_default_color_theme("blue")
 
 UNIT_OPTIONS = ["minutos", "horas", "dias", "semanas"]
 
+
+def _default_downloads() -> Path:
+    """Devuelve el path real de Downloads según Windows (respeta si fue movido)."""
+    try:
+        import winreg
+        key = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders",
+        )
+        val, _ = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")
+        return Path(val)
+    except Exception:
+        return _default_downloads()
+
 _HERE = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).parent
 
 
@@ -204,7 +218,7 @@ class SettingsWindow(ctk.CTk):
         self.delay_value = data.get("delay_value", 1)
         self.delay_unit  = data.get("delay_unit", "dias")
         self.rules: list[dict] = data.get("rules", [])
-        default_folders = [str(Path.home() / "Downloads")]
+        default_folders = [str(_default_downloads())]
         self.watch_folders: list[str] = data.get("watch_folders", default_folders)
 
     # --- layout --------------------------------------------------------------
@@ -342,7 +356,7 @@ class SettingsWindow(ctk.CTk):
     def _get_browse_base(self) -> Path:
         if self.watch_folders:
             return Path(self.watch_folders[0]).expanduser()
-        return Path.home() / "Downloads"
+        return _default_downloads()
 
     # --- actions -------------------------------------------------------------
 

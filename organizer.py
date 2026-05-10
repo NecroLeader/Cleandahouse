@@ -123,14 +123,28 @@ def delay_label() -> str:
     return f"{_config.get('delay_value', 1)} {_config.get('delay_unit', 'dias')}"
 
 
+def _default_downloads() -> Path:
+    """Devuelve el path real de Downloads según Windows (respeta si fue movido)."""
+    try:
+        import winreg
+        key = winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders",
+        )
+        val, _ = winreg.QueryValueEx(key, "{374DE290-123F-4565-9164-39C4925E467B}")
+        return Path(val)
+    except Exception:
+        return Path.home() / "Downloads"
+
+
 def get_watch_folders() -> list[Path]:
-    raw = _config.get("watch_folders", [str(Path.home() / "Downloads")])
+    raw = _config.get("watch_folders", [str(_default_downloads())])
     folders = []
     for f in raw:
         p = Path(f).expanduser()
         if p.is_dir():
             folders.append(p)
-    return folders or [Path.home() / "Downloads"]
+    return folders or [_default_downloads()]
 
 # ---------------------------------------------------------------------------
 # CLASIFICADOR  (lee reglas del config en cada llamada)
