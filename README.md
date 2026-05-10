@@ -109,9 +109,17 @@ build.bat
 
 Output: `dist/Cleandahouse.exe`. If `dist/config.json` doesn't exist, the build copies `config.default.json` there as a starting point.
 
-Distribute both files together — the user edits their `config.json` for their own rules.
+Each user edits their `config.json` for their own rules.
 
-> For a GitHub Release: attach a zip with `Cleandahouse.exe` + `config.default.json` renamed to `config.json`. Personal `config.json` is gitignored.
+**To publish a GitHub Release**, attach these three files individually:
+
+| File | Source |
+|------|--------|
+| `Cleandahouse.exe` | `dist/Cleandahouse.exe` |
+| `config.json` | `config.default.json` (rename before uploading) |
+| `README.md` | root `README.md` |
+
+> Personal `config.json` is gitignored — never commit it.
 
 ---
 
