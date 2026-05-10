@@ -22,8 +22,9 @@ python -m PyInstaller ^
   --collect-data customtkinter ^
   organizer.py
 
-echo [4/4] Copiando config base a dist\...
+echo [4/4] Copiando archivos de release a dist\...
 if not exist dist\config.json copy config.default.json dist\config.json >nul
+copy README.md dist\README.md >nul
 
 echo.
 echo ================================================
