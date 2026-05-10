@@ -107,8 +107,11 @@ Rules are evaluated top-to-bottom — first match wins.
 build.bat
 ```
 
-Output: `dist/Cleandahouse.exe` + `dist/config.json`
-Distribute both files together. The user edits `config.json` for their own rules.
+Output: `dist/Cleandahouse.exe`. If `dist/config.json` doesn't exist, the build copies `config.default.json` there as a starting point.
+
+Distribute both files together — the user edits their `config.json` for their own rules.
+
+> For a GitHub Release: attach a zip with `Cleandahouse.exe` + `config.default.json` renamed to `config.json`. Personal `config.json` is gitignored.
 
 ---
 
